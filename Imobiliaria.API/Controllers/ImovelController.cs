@@ -16,11 +16,5 @@ namespace Imobiliaria.API.Controllers
             var result = await _imovelService.CriarImovelAsync(request);
             return result.ToActionResult();
         }
-        [HttpGet]
-        public async Task<IActionResult> BuscarImovel(CriarImovelRequest request)
-        {
-            var result = await _imovelService.CriarImovelAsync(request);
-            return result.ToActionResult();
-        }
     }
 }

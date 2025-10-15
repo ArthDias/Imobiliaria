@@ -1,7 +1,9 @@
+using Imobiliaria.Application.Interfaces;
 using Imobiliaria.Application.Services;
 using Imobiliaria.Domain.Interfaces;
 using Imobiliaria.Infrastructure.Context;
 using Imobiliaria.Infrastructure.Repositories;
+using Imobiliaria.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +24,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<IImovelService, ImovelService>();
 builder.Services.AddScoped<IImovelRepository, ImovelRepository>();
+builder.Services.AddHttpClient<IViaCepService, ViaCepService>();
 
 var app = builder.Build();
 

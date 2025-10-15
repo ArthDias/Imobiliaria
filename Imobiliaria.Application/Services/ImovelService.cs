@@ -1,4 +1,5 @@
-﻿using Imobiliaria.Application.Requests.Imovel;
+﻿using Imobiliaria.Application.Interfaces;
+using Imobiliaria.Application.Requests.Imovel;
 using Imobiliaria.Domain.Common;
 using Imobiliaria.Domain.DTOs;
 using Imobiliaria.Domain.DTOs.Imoveis;
@@ -7,9 +8,10 @@ using Imobiliaria.Domain.Interfaces;
 
 namespace Imobiliaria.Application.Services;
 
-public class ImovelService(IImovelRepository imovelRepository) : IImovelService
+public class ImovelService(IImovelRepository imovelRepository, IViaCepService viaCepService) : IImovelService
 {
     private readonly IImovelRepository _imovelRepository = imovelRepository;
+    private readonly IViaCepService _viaCepService = viaCepService;
 
     public async Task<Result<ImovelDTO>> CriarImovelAsync(CriarImovelRequest request)
     {
@@ -17,7 +19,17 @@ public class ImovelService(IImovelRepository imovelRepository) : IImovelService
         {
             return Result.Failure<ImovelDTO>(Error.BadRequest("O objeto do request está vazio."));
         }
-        var imovel = MapImovel(request);
+
+        var cepResult = await _viaCepService.BuscarEnderecoPorCepAsync(request.Cep);
+
+        if (cepResult.IsFailure)
+        {
+            return Result.Failure<ImovelDTO>(cepResult.Error);
+        }
+
+        var endereco = cepResult.Value;
+
+        var imovel = MapImovel(request, endereco);
         var resultCriar = await _imovelRepository.CriarImovelAsync(imovel);
         if (resultCriar.IsFailure)
         {
@@ -44,12 +56,16 @@ public class ImovelService(IImovelRepository imovelRepository) : IImovelService
     {
         return await _imovelRepository.DeletarImovelAsync(id);
     }
-
-    private static Imovel MapImovel(CriarImovelRequest request)
+    private static Imovel MapImovel(CriarImovelRequest request, ViaCepDTO endereco)
     {
         return new Imovel()
         {
             Descricao = request.Descricao,
+            Cep = endereco.Cep,
+            Logradouro = endereco.Logradouro,
+            Numero = request.Numero,
+            Cidade = endereco.Localidade,
+            Estado = endereco.Uf,
             ValorAluguel = request.ValorAluguel,
         };
     }
