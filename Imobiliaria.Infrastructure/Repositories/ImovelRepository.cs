@@ -15,7 +15,7 @@ public class ImovelRepository(AppDbContext dbContext) : IImovelRepository
     {
         try
         {
-            _context.Imoveis.Add(imovel);
+            _context.IMOVEIS.Add(imovel);
             await _context.SaveChangesAsync();
             return Result.Success(imovel);
         }
@@ -28,7 +28,7 @@ public class ImovelRepository(AppDbContext dbContext) : IImovelRepository
     {
         try
         {
-            var imovel = await _context.Imoveis.FirstOrDefaultAsync(x => x.Id == id); //Pesquisar porque não usar FindAsync
+            var imovel = await _context.IMOVEIS.FirstOrDefaultAsync(x => x.Id == id); //Pesquisar porque não usar FindAsync
             return Result.Success(imovel);
         }
         catch (Exception ex)
@@ -40,7 +40,7 @@ public class ImovelRepository(AppDbContext dbContext) : IImovelRepository
     {
         try
         {
-            var listaImovies = await _context.Imoveis.ToListAsync();
+            var listaImovies = await _context.IMOVEIS.ToListAsync();
             return Result.Success(listaImovies);
         }
         catch (Exception ex)
@@ -52,7 +52,7 @@ public class ImovelRepository(AppDbContext dbContext) : IImovelRepository
     {
         try
         {
-            _context.Imoveis.Update(new Imovel());
+            _context.IMOVEIS.Update(new Imovel());
             await _context.SaveChangesAsync();
             return Result.Success();
         }
@@ -70,7 +70,7 @@ public class ImovelRepository(AppDbContext dbContext) : IImovelRepository
             {
                 return Result.Failure(Error.NotFound("Imóvel não encontrado."));
             }
-            _context.Imoveis.Remove(imovel.Value);
+            _context.IMOVEIS.Remove(imovel.Value);
             await _context.SaveChangesAsync();
             return Result.Success();
         }

@@ -4,7 +4,7 @@ using Imobiliaria.Domain.Entities;
 namespace Imobiliaria.Infrastructure.Context;
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
-    public DbSet<Imovel> Imoveis { get; set; }
+    public DbSet<Imovel> IMOVEIS { get; set; }
     public DbSet<Cliente> Clientes { get; set; }
     public DbSet<Locacao> Locacoes { get; set; }
 

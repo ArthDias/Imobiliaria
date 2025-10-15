@@ -1,25 +1,21 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Imobiliaria.Domain.Entities;
+namespace Imobiliaria.Application.Requests.Imovel;
 
-[Table("IMOVEIS")]
-public class Imovel
+public class CriarImovelRequest
 {
-    public int Id { get; set; }
-    public string Descricao { get; set; } = string.Empty;
-
     [Required]
-    [StringLength(8, MinimumLength = 8)]
+    public string Descricao { get; set; } = string.Empty;
+    [Required]
     public string Cep { get; set; } = string.Empty;
-
+    [Required]
     public string Logradouro { get; set; } = string.Empty;
+    [Required]
     public string Numero { get; set; } = string.Empty;
+    [Required]
     public string Cidade { get; set; } = string.Empty;
+    [Required]
     public string Estado { get; set; } = string.Empty;
-
-    [Range(0, double.MaxValue)]
+    [Required]
     public decimal ValorAluguel { get; set; }
-
-    public string Status { get; set; } = string.Empty;
 }
