@@ -1,15 +1,17 @@
-﻿using Imobiliaria.Domain.Entities;
-using Imobiliaria.Domain.Common;
+﻿using Imobiliaria.Domain.Common;
+using Imobiliaria.Domain.DTOs.Imoveis;
+using Imobiliaria.Domain.Entities;
+using Imobiliaria.Domain.Interfaces;
 using Imobiliaria.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace Imobiliaria.Infrastructure.Repositories;
 
-public class ImovelRepository(AppDbContext dbContext)
+public class ImovelRepository(AppDbContext dbContext) : IImovelRepository
 {
     private readonly AppDbContext _context = dbContext;
 
-    public async Task<Result<Imovel>> CreateImovelAsync(Imovel imovel)
+    public async Task<Result<Imovel>> CriarImovelAsync(Imovel imovel)
     {
         try
         {
@@ -22,7 +24,7 @@ public class ImovelRepository(AppDbContext dbContext)
             return Result.Failure<Imovel>(Error.InternalServerError(ex.Message));
         }
     }
-    public async Task<Result<Imovel?>> GetImovelByIdAsync(int id)
+    public async Task<Result<Imovel?>> BuscarImovelByIdAsync(int id)
     {
         try
         {
@@ -34,10 +36,10 @@ public class ImovelRepository(AppDbContext dbContext)
             return Result.Failure<Imovel?>(Error.InternalServerError(ex.Message));
         }
     }
-    public async Task<Result<List<Imovel>>> GetAllAsync()
+    public async Task<Result<List<Imovel>>> BuscarTodosAsync()
     {
         try
-        {             
+        {
             var listaImovies = await _context.Imoveis.ToListAsync();
             return Result.Success(listaImovies);
         }
@@ -46,11 +48,11 @@ public class ImovelRepository(AppDbContext dbContext)
             return Result.Failure<List<Imovel>>(Error.InternalServerError(ex.Message));
         }
     }
-    public async Task<Result> UpdateAsync(Imovel imovel)
+    public async Task<Result> AtualizarAsync(int id, AtualizarImovelDto imovel)
     {
         try
         {
-            _context.Imoveis.Update(imovel);
+            _context.Imoveis.Update(new Imovel());
             await _context.SaveChangesAsync();
             return Result.Success();
         }
@@ -59,11 +61,11 @@ public class ImovelRepository(AppDbContext dbContext)
             return Result.Failure<Imovel>(Error.InternalServerError(ex.Message));
         }
     }
-    public async Task<Result> DeleteImovelAsync(int id)
+    public async Task<Result> DeletarImovelAsync(int id)
     {
         try
         {
-            var imovel = await GetImovelByIdAsync(id);
+            var imovel = await BuscarImovelByIdAsync(id);
             if (imovel.IsFailure || imovel.Value == null)
             {
                 return Result.Failure(Error.NotFound("Imóvel não encontrado."));
