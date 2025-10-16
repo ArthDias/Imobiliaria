@@ -1,4 +1,6 @@
-﻿namespace Imobiliaria.Domain.DTOs;
+﻿using Imobiliaria.Domain.Enums;
+
+namespace Imobiliaria.Domain.DTOs;
 public class ImovelDTO
 {
     public int Id { get; set; }
@@ -9,4 +11,5 @@ public class ImovelDTO
     public string Cidade { get; set; } = string.Empty;
     public string Estado { get; set; } = string.Empty;
     public decimal ValorAluguel { get; set; }
+    public EStatusImovel Status { get; set; }
 }

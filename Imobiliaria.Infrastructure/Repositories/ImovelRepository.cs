@@ -1,5 +1,4 @@
 ﻿using Imobiliaria.Domain.Common;
-using Imobiliaria.Domain.DTOs.Imoveis;
 using Imobiliaria.Domain.Entities;
 using Imobiliaria.Domain.Interfaces;
 using Imobiliaria.Infrastructure.Context;
@@ -28,7 +27,7 @@ public class ImovelRepository(AppDbContext dbContext) : IImovelRepository
     {
         try
         {
-            var imovel = await _context.IMOVEIS.FirstOrDefaultAsync(x => x.Id == id); //Pesquisar porque não usar FindAsync
+            var imovel = await _context.IMOVEIS.FindAsync(id);
             return Result.Success(imovel);
         }
         catch (Exception ex)
@@ -48,11 +47,11 @@ public class ImovelRepository(AppDbContext dbContext) : IImovelRepository
             return Result.Failure<List<Imovel>>(Error.InternalServerError(ex.Message));
         }
     }
-    public async Task<Result> AtualizarAsync(int id, AtualizarImovelDto imovel)
+    public async Task<Result> AtualizarAsync(int id, Imovel imovel)
     {
         try
         {
-            _context.IMOVEIS.Update(new Imovel());
+            _context.IMOVEIS.Entry(imovel).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return Result.Success();
         }

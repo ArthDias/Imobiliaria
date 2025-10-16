@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Imobiliaria.Domain.Enums;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Imobiliaria.Domain.Entities;
@@ -21,5 +22,5 @@ public class Imovel
     [Range(0, double.MaxValue)]
     public decimal ValorAluguel { get; set; }
 
-    public string Status { get; set; } = string.Empty;
+    public EStatusImovel Status { get; set; }
 }

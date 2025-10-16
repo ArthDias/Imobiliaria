@@ -2,8 +2,8 @@
 using Imobiliaria.Application.Requests.Imovel;
 using Imobiliaria.Domain.Common;
 using Imobiliaria.Domain.DTOs;
-using Imobiliaria.Domain.DTOs.Imoveis;
 using Imobiliaria.Domain.Entities;
+using Imobiliaria.Domain.Enums;
 using Imobiliaria.Domain.Interfaces;
 
 namespace Imobiliaria.Application.Services;
@@ -40,20 +40,75 @@ public class ImovelService(IImovelRepository imovelRepository, IViaCepService vi
         return Result.Success(imovelDTO);
     }
 
-    public async Task<Result<Imovel?>> BuscarImovelByIdAsync(int id)
+    public async Task<Result<Imovel>> BuscarImovelByIdAsync(int id)
     {
-        return await _imovelRepository.BuscarImovelByIdAsync(id);
+        var resultGetByIdToUpdate = await _imovelRepository.BuscarImovelByIdAsync(id);
+        if (resultGetByIdToUpdate.IsFailure)
+            return Result.Failure<Imovel>(resultGetByIdToUpdate.Error);
+
+        if (resultGetByIdToUpdate.Value == null)
+            return Result.Failure<Imovel>(Error.BadRequest("Imóvel inexistente"));
+
+        return Result.Success(resultGetByIdToUpdate.Value);
     }
     public async Task<Result<List<Imovel>>> BuscarTodosAsync()
     {
-        return await _imovelRepository.BuscarTodosAsync();
+        var resultGetByIdToUpdate = await _imovelRepository.BuscarTodosAsync();
+        if (resultGetByIdToUpdate.IsFailure)
+            return Result.Failure<List<Imovel>> (resultGetByIdToUpdate.Error);
+
+        if (resultGetByIdToUpdate.Value == null)
+            return Result.Failure<List<Imovel>> (Error.BadRequest("Nenhum imóvel cadastrado"));
+
+        return Result.Success(resultGetByIdToUpdate.Value);
     }
-    public async Task<Result> AtualizarAsync(int id, AtualizarImovelDto imovel)
+    public async Task<Result> AtualizarAsync(int id, AtualizarImovelRequest imovel)
     {
-        return await _imovelRepository.AtualizarAsync(id, imovel);
+        var resultGetByIdToUpdate = await _imovelRepository.BuscarImovelByIdAsync(id);
+        if (resultGetByIdToUpdate.IsFailure)
+            return Result.Failure(resultGetByIdToUpdate.Error);
+
+        if (resultGetByIdToUpdate.Value == null)
+            return Result.Failure(Error.BadRequest("Imóvel inexistente"));
+
+        if (imovel == null)
+        {
+            return Result.Failure(Error.BadRequest("O objeto do request está vazio."));
+        }
+
+        Imovel imovelToUpdate = resultGetByIdToUpdate.Value;
+        var imovelAtualizado = imovelToUpdate;
+        if(imovel.Descricao != null) imovelAtualizado.Descricao = imovel.Descricao;
+        if(imovel.Numero != null) imovelAtualizado.Numero = imovel.Numero;
+        if(imovel.ValorAluguel != null) imovelAtualizado.ValorAluguel = (decimal)imovel.ValorAluguel;
+        if(imovel.Cep != null) 
+        {
+            var cepResult = await _viaCepService.BuscarEnderecoPorCepAsync(imovel.Cep);
+            if (cepResult.IsFailure)
+            {
+                return Result.Failure(cepResult.Error);
+            }
+            var endereco = cepResult.Value;
+            imovelAtualizado.Cep = endereco.Cep;
+            imovelAtualizado.Logradouro = endereco.Logradouro;
+            imovelAtualizado.Cidade = endereco.Localidade;
+            imovelAtualizado.Estado = endereco.Uf;
+        }
+        if(imovel.Numero != null) imovelAtualizado.Numero = imovel.Numero;
+        if(imovel.Status != null) imovelAtualizado.Status = (EStatusImovel)imovel.Status;
+
+
+        return await _imovelRepository.AtualizarAsync(id, imovelAtualizado);
     }
     public async Task<Result> DeletarImovelAsync(int id)
     {
+        var imovelResult = await _imovelRepository.BuscarImovelByIdAsync(id);
+        if (imovelResult.IsFailure)
+            return Result.Failure<ImovelDTO>(imovelResult.Error);
+
+        if (imovelResult.Value == null)
+            return Result.Failure<ImovelDTO>(Error.BadRequest("Imóvel inexistente"));
+
         return await _imovelRepository.DeletarImovelAsync(id);
     }
     private static Imovel MapImovel(CriarImovelRequest request, ViaCepDTO endereco)
@@ -67,6 +122,7 @@ public class ImovelService(IImovelRepository imovelRepository, IViaCepService vi
             Cidade = endereco.Localidade,
             Estado = endereco.Uf,
             ValorAluguel = request.ValorAluguel,
+            Status = EStatusImovel.Vago,
         };
     }
     private static ImovelDTO MapImovelDTO(Imovel imovel)
@@ -81,6 +137,7 @@ public class ImovelService(IImovelRepository imovelRepository, IViaCepService vi
             Cidade = imovel.Cidade,
             Estado = imovel.Estado,
             ValorAluguel = imovel.ValorAluguel,
+            Status = imovel.Status
         };
     }
 
